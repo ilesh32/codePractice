@@ -3,9 +3,11 @@
 A minimal [Model Context Protocol](https://modelcontextprotocol.io) server used
 to smoke-test container deployments (e.g. on TrueFoundry).
 
-It uses the `mcp` Python SDK (v2) and speaks MCP over the **streamable-http**
-transport, so it runs as an ordinary long-lived HTTP service inside a
-container rather than needing a stdio-attached client.
+It uses the `mcp` Python SDK (v2). By default it speaks MCP over the
+**streamable-http** transport, so it runs as an ordinary long-lived HTTP
+service inside a container. It can also run over **stdio** (set
+`MCP_TRANSPORT=stdio`) for local MCP clients like Claude Desktop or Cursor
+that spawn the server as a subprocess.
 
 ## What it exposes
 
@@ -18,8 +20,36 @@ Configured via env vars:
 
 | Var    | Default   | Purpose                          |
 |--------|-----------|-----------------------------------|
-| `HOST` | `0.0.0.0` | Bind address                      |
-| `PORT` | `8000`    | Port the HTTP server listens on   |
+| `HOST` | `0.0.0.0` | Bind address                            |
+| `PORT` | `8000`    | Port the HTTP server listens on         |
+| `MCP_TRANSPORT` | `streamable-http` | `streamable-http` or `stdio` |
+
+## STDIO configuration (local MCP clients)
+
+To register this server with an MCP client that talks stdio (Claude
+Desktop, Cursor, etc.), point it at `server.py` with `MCP_TRANSPORT=stdio`.
+See `mcp-stdio-config.json` for a ready-to-use snippet:
+
+```json
+{
+  "mcpServers": {
+    "sample-mcp-server": {
+      "command": "python3",
+      "args": ["/home/user/codePractice/mcp-server/server.py"],
+      "env": {
+        "MCP_TRANSPORT": "stdio"
+      }
+    }
+  }
+}
+```
+
+Merge this into your client's own config file (e.g.
+`claude_desktop_config.json`) under its top-level `mcpServers` key, and
+update the `args` path to wherever you checked this repo out. Make sure the
+`mcp` package is installed for whatever Python the `command` resolves to
+(activate the same venv, or use its absolute interpreter path instead of
+`python3`).
 
 ## Run locally (no Docker)
 

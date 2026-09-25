@@ -1,8 +1,9 @@
 """Sample MCP server for testing deployment on TrueFoundry.
 
-Exposes a few toy tools and a resource over the MCP "streamable-http"
-transport, so it can run as a normal HTTP service inside a container
-instead of needing a stdio-attached client.
+Exposes a few toy tools and a resource. Defaults to the "streamable-http"
+transport so it can run as a normal HTTP service inside a container, but
+also supports "stdio" (set MCP_TRANSPORT=stdio) for local MCP clients
+such as Claude Desktop or Cursor that spawn the server as a subprocess.
 """
 
 import os
@@ -51,12 +52,16 @@ async def health(_request: Request) -> JSONResponse:
 
 
 if __name__ == "__main__":
-    host = os.environ.get("HOST", "0.0.0.0")
-    port = int(os.environ.get("PORT", "8000"))
+    transport = os.environ.get("MCP_TRANSPORT", "streamable-http")
 
-    mcp.run(
-        transport="streamable-http",
-        host=host,
-        port=port,
-        stateless_http=True,
-    )
+    if transport == "stdio":
+        mcp.run(transport="stdio")
+    else:
+        host = os.environ.get("HOST", "0.0.0.0")
+        port = int(os.environ.get("PORT", "8000"))
+        mcp.run(
+            transport="streamable-http",
+            host=host,
+            port=port,
+            stateless_http=True,
+        )
