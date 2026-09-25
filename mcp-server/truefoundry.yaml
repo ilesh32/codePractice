@@ -12,7 +12,14 @@
 #    git, not local):
 #     pip install truefoundry
 #     tfy login
-#     tfy deploy --file truefoundry.yaml --workspace-fqn <your-workspace-fqn>
+#     tfy apply -f truefoundry.yaml
+#
+#   `tfy apply` reads the manifest as-is, so `workspace_fqn` below MUST be
+#   set to a real value first (it does not take a --workspace-fqn flag the
+#   way `tfy deploy` does). Find yours with:
+#     tfy get workspaces
+#   or in the UI under Workspaces (format is usually
+#   "<cluster>:<workspace-name>").
 #
 # If you'd rather have TrueFoundry build from your local disk instead of
 # git (e.g. to test uncommitted changes), run `tfy deploy` from inside
@@ -28,6 +35,7 @@
 
 name: sample-mcp-server
 type: service
+workspace_fqn: <your-workspace-fqn>  # e.g. tf-hc-test:ilesh-workspace — replace before applying
 
 image:
   type: build

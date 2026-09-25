@@ -105,13 +105,17 @@ liveness/readiness probe.
    pip install truefoundry
    tfy login
    ```
-2. Deploy (can be run from anywhere — the code comes from git, not disk):
+2. Edit `workspace_fqn: <your-workspace-fqn>` near the top of
+   `mcp-server/truefoundry.yaml` to a real workspace (find one with
+   `tfy get workspaces`, or in the UI under Workspaces — format is usually
+   `<cluster>:<workspace-name>`). `tfy apply` reads the manifest as-is, so
+   this field must already be set in the file; there's no `--workspace-fqn`
+   flag for it like `tfy deploy` has.
+3. Deploy (can be run from anywhere — the code comes from git, not disk):
    ```bash
-   tfy deploy --file mcp-server/truefoundry.yaml --workspace-fqn <your-workspace-fqn>
+   tfy apply -f mcp-server/truefoundry.yaml
    ```
-   (replace `<your-workspace-fqn>` with the workspace you want to deploy
-   into — find it in the TrueFoundry UI under Workspaces).
-3. Once deployed, TrueFoundry gives you a public/internal endpoint URL. Test
+4. Once deployed, TrueFoundry gives you a public/internal endpoint URL. Test
    it the same way as local:
    ```bash
    curl https://<your-service-endpoint>/health
