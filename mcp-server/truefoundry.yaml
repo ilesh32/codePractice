@@ -1,12 +1,24 @@
 # TrueFoundry deployment spec for the sample MCP server.
 #
-# Deploy with the TrueFoundry CLI from this directory:
-#   pip install truefoundry
-#   tfy login
-#   tfy deploy --file truefoundry.yaml --workspace-fqn <your-workspace-fqn>
+# build_source below is set to "git" so TrueFoundry clones this exact repo
+# and branch itself and builds from mcp-server/Dockerfile there — nothing
+# needs to be checked out on your machine first. Two ways to trigger it:
 #
-# Or apply it from the TrueFoundry UI by creating a Service and pointing it
-# at this repo/folder (it will detect the Dockerfile automatically).
+# 1. UI: Create a new Service -> "Deploy from Git Repo" -> paste the repo
+#    URL -> pick branch "test-mcp-server" -> it reads this file (or you
+#    paste/upload it) and shows the build_source/build_spec below prefilled.
+#
+# 2. CLI, from anywhere (does NOT need a local clone since build_source is
+#    git, not local):
+#     pip install truefoundry
+#     tfy login
+#     tfy deploy --file truefoundry.yaml --workspace-fqn <your-workspace-fqn>
+#
+# If you'd rather have TrueFoundry build from your local disk instead of
+# git (e.g. to test uncommitted changes), run `tfy deploy` from inside
+# mcp-server/ and swap build_source for:
+#   build_source:
+#     type: local
 
 name: sample-mcp-server
 type: service
@@ -14,11 +26,13 @@ type: service
 image:
   type: build
   build_source:
-    type: local
+    type: git
+    repo_url: https://github.com/ilesh32/codepractice
+    branch_name: test-mcp-server
   build_spec:
     type: dockerfile
-    dockerfile_path: ./Dockerfile
-    build_context_path: ./
+    dockerfile_path: ./mcp-server/Dockerfile
+    build_context_path: ./mcp-server
 
 ports:
   - port: 8000

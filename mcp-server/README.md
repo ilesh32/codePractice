@@ -93,18 +93,21 @@ curl http://localhost:8000/health
 
 ## Deploy to TrueFoundry
 
-`truefoundry.yaml` in this folder is a ready-to-edit deployment spec that
-builds the image from the `Dockerfile`, exposes port `8000`, and wires up the
-`/health` endpoint as the liveness/readiness probe.
+`truefoundry.yaml` in this folder is a ready-to-edit deployment spec. Its
+`build_source` is set to `type: git`, so **TrueFoundry itself clones this
+repo** (`repo_url` + `branch_name` in the file) and builds
+`mcp-server/Dockerfile` server-side — you do not need a local checkout for
+this to work. It exposes port `8000` and wires up `/health` as the
+liveness/readiness probe.
 
 1. Install the CLI and log in:
    ```bash
    pip install truefoundry
    tfy login
    ```
-2. Deploy:
+2. Deploy (can be run from anywhere — the code comes from git, not disk):
    ```bash
-   tfy deploy --file truefoundry.yaml --workspace-fqn <your-workspace-fqn>
+   tfy deploy --file mcp-server/truefoundry.yaml --workspace-fqn <your-workspace-fqn>
    ```
    (replace `<your-workspace-fqn>` with the workspace you want to deploy
    into — find it in the TrueFoundry UI under Workspaces).
@@ -116,6 +119,11 @@ builds the image from the `Dockerfile`, exposes port `8000`, and wires up the
    and point an MCP client's Streamable HTTP transport at
    `https://<your-service-endpoint>/mcp`.
 
-Alternatively, skip the CLI and create the Service from the TrueFoundry UI by
-pointing it at this repo — it will detect the `Dockerfile` and let you set
-the port/env vars/probes interactively (matching what's in `truefoundry.yaml`).
+Alternatively, skip the CLI and use the TrueFoundry UI: **New Service ->
+Deploy from Git Repo**, paste this repo's URL, pick the `test-mcp-server`
+branch, and set `mcp-server` as the subdirectory — it will detect the
+`Dockerfile` there and prefill the same settings as `truefoundry.yaml`.
+
+If you'd rather build from your local disk instead of git (e.g. to test
+uncommitted changes), run `tfy deploy` from inside `mcp-server/` and change
+`build_source` in the yaml to `type: local` (see the comment in the file).
