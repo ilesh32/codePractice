@@ -19,6 +19,12 @@
 # mcp-server/ and swap build_source for:
 #   build_source:
 #     type: local
+#
+# NOTE: `ref` (a commit SHA) is a required field alongside branch_name —
+# TrueFoundry builds that exact commit, not just "whatever HEAD of the
+# branch happens to be" at apply time. Whenever you push new commits to
+# this branch and want to redeploy them, update `ref` to the new SHA:
+#   git rev-parse origin/test-mcp-server
 
 name: sample-mcp-server
 type: service
@@ -29,6 +35,7 @@ image:
     type: git
     repo_url: https://github.com/ilesh32/codepractice
     branch_name: test-mcp-server
+    ref: 3462a5945b8b2b09e46c83f1703b986e549619ba
   build_spec:
     type: dockerfile
     dockerfile_path: ./mcp-server/Dockerfile
