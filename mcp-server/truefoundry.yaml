@@ -1,0 +1,86 @@
+# TrueFoundry deployment spec for the sample MCP server.
+#
+# build_source below is set to "git" so TrueFoundry clones this exact repo
+# and branch itself and builds from mcp-server/Dockerfile there — nothing
+# needs to be checked out on your machine first. Two ways to trigger it:
+#
+# 1. UI: Create a new Service -> "Deploy from Git Repo" -> paste the repo
+#    URL -> pick branch "test-mcp-server" -> it reads this file (or you
+#    paste/upload it) and shows the build_source/build_spec below prefilled.
+#
+# 2. CLI, from anywhere (does NOT need a local clone since build_source is
+#    git, not local):
+#     pip install truefoundry
+#     tfy login
+#     tfy apply -f truefoundry.yaml
+#
+#   `tfy apply` reads the manifest as-is, so `workspace_fqn` below MUST be
+#   set to a real value first (it does not take a --workspace-fqn flag the
+#   way `tfy deploy` does). Find yours with:
+#     tfy get workspaces
+#   or in the UI under Workspaces (format is usually
+#   "<cluster>:<workspace-name>").
+#
+# If you'd rather have TrueFoundry build from your local disk instead of
+# git (e.g. to test uncommitted changes), run `tfy deploy` from inside
+# mcp-server/ and swap build_source for:
+#   build_source:
+#     type: local
+#
+# NOTE: `ref` (a commit SHA) is a required field alongside branch_name —
+# TrueFoundry builds that exact commit, not just "whatever HEAD of the
+# branch happens to be" at apply time. Whenever you push new commits to
+# this branch and want to redeploy them, update `ref` to the new SHA:
+#   git rev-parse origin/test-mcp-server
+
+name: sample-mcp-server
+type: service
+workspace_fqn: <your-workspace-fqn>  # e.g. tf-hc-test:ilesh-workspace — replace before applying
+
+image:
+  type: build
+  build_source:
+    type: git
+    repo_url: https://github.com/ilesh32/codepractice
+    branch_name: test-mcp-server
+    ref: 3462a5945b8b2b09e46c83f1703b986e549619ba
+  build_spec:
+    type: dockerfile
+    dockerfile_path: ./mcp-server/Dockerfile
+    build_context_path: ./mcp-server
+
+ports:
+  - port: 8000
+    protocol: TCP
+    expose: true
+    app_protocol: http
+
+env:
+  HOST: "0.0.0.0"
+  PORT: "8000"
+
+resources:
+  cpu_request: 0.2
+  cpu_limit: 0.5
+  memory_request: 256
+  memory_limit: 512
+  ephemeral_storage_request: 500
+  ephemeral_storage_limit: 1000
+
+replicas: 1
+
+liveness_probe:
+  config:
+    type: http
+    path: /health
+    port: 8000
+  initial_delay_seconds: 5
+  period_seconds: 10
+
+readiness_probe:
+  config:
+    type: http
+    path: /health
+    port: 8000
+  initial_delay_seconds: 5
+  period_seconds: 10
