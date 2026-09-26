@@ -13,9 +13,9 @@ from datetime import datetime, timezone
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
-from mcp.server.mcpserver import MCPServer
+from fastmcp import FastMCP
 
-mcp = MCPServer(
+mcp = FastMCP(
     name="sample-mcp-server",
     instructions="A minimal sample MCP server used to smoke-test container deployments.",
 )
